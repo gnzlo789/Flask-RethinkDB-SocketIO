@@ -13,6 +13,27 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 
+import json
+class ChatSession(object):
+	def __init__(self, session, user, msg):
+		this.session = session
+		this.user = user
+		this.message = msg
+	
+	def save(self):
+		j = self.to_json()
+	
+		# save in rethinkdb
+
+	def to_json(self):
+		return json.dumps({
+			"session": this.session,
+			"user": this.user,
+			"message": msg,
+			"attributes": {}
+		})
+	
+
 
 def background_thread_original():
     """Example of how to send server generated events to clients."""
@@ -38,7 +59,7 @@ import rethinkdb as r
 
 def listen_for_changes():
 	conn = r.connect( "localhost", 28015)
-	feed = r.db('mydb').table('mytable').changes().run(conn)
+	feed = r.db('calendarapi').table('events').changes().run(conn)
 	for change in feed:
 		print("new change")
 		print(change)
@@ -101,6 +122,7 @@ def send_room_message(message):
 
 @socketio.on('disconnect request', namespace='/test')
 def disconnect_request():
+    print("disconnect request")
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my response',
          {'data': 'Disconnected!', 'count': session['receive_count']})
